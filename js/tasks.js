@@ -198,6 +198,18 @@ let taskInterface = {
     }
   },
 
+  formatTime: function (date) {
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    const seconds = date.getSeconds().toString().padStart(2, '0')
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+  },
+
   bind: async function () {
     // cancel buttons click
     $(document).on("click", ".cancel", async function (e) {
@@ -462,6 +474,7 @@ let taskInterface = {
         }
         out += '</small>';
         out += '</label>';
+        out += '<div class="time-start">start: ' + taskInterface.formatTime(task.start) + '</div>';
         out += '<a href="#" class="update" rel="' + task.id + '" title="Edit: ' + task.name + '" data-name="' + task.name + '">Edit</a> | ';
         out += '<a href="#" class="reset" rel="' + task.id + '" title="Reset: ' + task.name + '" data-name="' + task.name + '">Reset</a> | ';
         out += '<a href="#" class="remove" rel="' + task.id + '" title="Delete: ' + task.name + '" data-name="' + task.name + '">Delete</a>';
@@ -515,21 +528,22 @@ let taskInterface = {
     await this.toggleRunText();
   },
 
-  toggleTimer: async function () {
-    let results = await taskInterface.db.select({
+  toggleTimer: async function (id) {
+    let tasks= await taskInterface.db.select({
       from: "tasks",
     });
 
-    if (results.length) {
-      results.forEach(task => {
-        $('#item').toggleClass('running');
-        $('#item' + ' .power').toggleClass('running');
+    if (tasks.length) {
+      tasks.forEach(task => {
+        $('#item' + id).toggleClass('running');
+        $('#item' + id + ' .power').toggleClass('running');
 
         if (task.running === 1) {
           taskInterface.stopTask(task);
         } else {
-          taskInterface.startTask(task);
+          taskInterface.startTask(task)
         }
+
       });
 
       await taskInterface.count();
@@ -550,7 +564,6 @@ let taskInterface = {
       await tasks.update(
         {
           running: 1,
-          start: start
         },
         {
           id: task.id
