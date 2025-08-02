@@ -515,19 +515,15 @@ let taskInterface = {
     await this.toggleRunText();
   },
 
-  toggleTimer: async function (id) {
+  toggleTimer: async function () {
     let results = await taskInterface.db.select({
       from: "tasks",
-      where: {
-        id: parseInt(id)
-      },
-      limit: 1
     });
 
     if (results.length) {
       results.forEach(task => {
-        $('#item' + id).toggleClass('running');
-        $('#item' + id + ' .power').toggleClass('running');
+        $('#item').toggleClass('running');
+        $('#item' + ' .power').toggleClass('running');
 
         if (task.running === 1) {
           taskInterface.stopTask(task);
